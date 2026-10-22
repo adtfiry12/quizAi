@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Koding AI - Kejar.id Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .btn-option { transition: all 0.2s ease; }
+        .btn-option:hover { border-color: #3b82f6; background-color: #eff6ff; }
+        .btn-option.selected { border-color: #2563eb; background-color: #dbeafe; }
+        
+        .nav-btn { transition: all 0.2s ease; }
+        .nav-btn.answered { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .nav-btn.ragu { background-color: #eab308; color: white; border-color: #eab308; }
+        .nav-btn.active { outline: 3px solid #93c5fd; outline-offset: 2px; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center z-10">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">K</div>
+            <h1 class="text-xl font-bold text-gray-800 tracking-tight">Kuis<span class="text-blue-600">AI</span></h1>
+        </div>
+        <div id="nav-timer" class="hidden font-mono font-bold text-lg bg-gray-100 px-4 py-1 rounded-md text-gray-700 border border-gray-200">
+            01:00:00
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="flex-1 overflow-hidden relative">
+        
+        <!-- VIEW: MAIN MENU -->
+        <div id="view-menu" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 p-4 overflow-y-auto">
+            <div class="max-w-xl w-full bg-white p-8 rounded-2xl shadow-xl text-center border border-gray-100">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-gray-800">Uji Pemahaman Koding AI</h2>
+                <p class="text-gray-500 mb-8">Pilih jumlah soal untuk memulai. Soal akan diacak dari bank data secara otomatis untuk mengasah ingatan Anda.</p>
+                
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <button onclick="startQuiz(10)" class="p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors group">
+                        <div class="text-3xl font-bold text-gray-700 group-hover:text-blue-600 mb-1">10</div>
+                        <div class="text-sm text-gray-500">Soal Singkat</div>
+                    </button>
+                    <button onclick="startQuiz(30)" class="p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-colors group">
+                        <div class="text-3xl font-bold text-gray-700 group-hover:text-blue-600 mb-1">30</div>
+                        <div class="text-sm text-gray-500">Soal Menengah</div>
+                    </button>
+                    <button onclick="startQuiz(50)" class="p-4 border-2 border-blue-600 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-md shadow-blue-200 group">
+                        <div class="text-3xl font-bold mb-1">50</div>
+                        <div class="text-sm text-blue-100">Ujian Penuh</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: QUIZ AREA -->
+        <div id="view-quiz" class="hidden absolute inset-0 flex flex-col md:flex-row overflow-hidden bg-gray-50 p-4 md:p-6 gap-6">
+            
+            <!-- Left Panel: Question -->
+            <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden h-full">
+                <!-- Question Header -->
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h3 class="font-semibold text-gray-700">Soal No. <span id="q-number" class="text-blue-600 text-xl">1</span></h3>
+                    <button onclick="toggleRagu()" id="btn-ragu" class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-100 transition">
+                        <input type="checkbox" id="chk-ragu" class="w-4 h-4 text-yellow-500 rounded border-gray-300 pointer-events-none">
+                        Ragu-ragu
+                    </button>
+                </div>
+                
+                <!-- Question Body -->
+                <div class="p-6 flex-1 overflow-y-auto">
+                    <div id="q-text" class="text-lg text-gray-800 mb-6 leading-relaxed">
+                        <!-- Question goes here -->
+                    </div>
+                    
+                    <div id="q-options" class="flex flex-col gap-3">
+                        <!-- Options go here -->
+                    </div>
+                </div>
+
+                <!-- Footer Navigation -->
+                <div class="px-6 py-4 border-t border-gray-100 flex justify-between bg-gray-50/50">
+                    <button onclick="prevQuestion()" class="px-5 py-2.5 rounded-lg border border-gray-300 font-medium text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg> Sebelumnya
+                    </button>
+                    <button onclick="nextQuestion()" class="px-5 py-2.5 rounded-lg bg-blue-600 font-medium text-white hover:bg-blue-700 flex items-center gap-2 shadow-sm">
+                        Selanjutnya <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Number Navigation -->
+            <div class="w-full md:w-80 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col shrink-0 h-64 md:h-full">
+                <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/50">
+                    <h3 class="font-semibold text-gray-700">Navigasi Soal</h3>
+                </div>
+                <div class="p-5 flex-1 overflow-y-auto">
+                    <div id="nav-grid" class="grid grid-cols-5 gap-2">
+                        <!-- Number buttons generated here -->
+                    </div>
+                </div>
+                <div class="px-5 py-4 border-t border-gray-100 bg-gray-50/50">
+                    <div class="flex items-center gap-4 text-xs text-gray-500 mb-4 justify-center">
+                        <div class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-white border border-gray-300"></div> Kosong</div>
+                        <div class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-blue-600"></div> Terjawab</div>
+                        <div class="flex items-center gap-1"><div class="w-3 h-3 rounded-full bg-yellow-500"></div> Ragu</div>
+                    </div>
+                    <button onclick="confirmSubmit()" class="w-full py-3 rounded-lg bg-green-600 text-white font-bold hover:bg-green-700 transition shadow-sm">
+                        Kumpulkan Ujian
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: RESULTS -->
+        <div id="view-result" class="hidden absolute inset-0 flex flex-col items-center justify-start bg-gray-50 p-4 overflow-y-auto py-10">
+            <div class="max-w-2xl w-full bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Hasil Kuis</h2>
+                    <p class="text-gray-500">Berikut adalah rekapitulasi pengerjaan Anda.</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mb-8 text-center">
+                    <div class="bg-green-50 rounded-xl p-4 border border-green-100">
+                        <div class="text-3xl font-bold text-green-600 mb-1" id="res-benar">0</div>
+                        <div class="text-sm font-medium text-green-800">Benar</div>
+                    </div>
+                    <div class="bg-red-50 rounded-xl p-4 border border-red-100">
+                        <div class="text-3xl font-bold text-red-600 mb-1" id="res-salah">0</div>
+                        <div class="text-sm font-medium text-red-800">Salah</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <div class="text-3xl font-bold text-gray-600 mb-1" id="res-kosong">0</div>
+                        <div class="text-sm font-medium text-gray-600">Kosong</div>
+                    </div>
+                </div>
+
+                <div class="text-center mb-8">
+                    <div class="text-6xl font-black text-blue-600 mb-2" id="res-score">100</div>
+                    <div class="text-lg text-gray-500 font-medium">Nilai Akhir</div>
+                </div>
+
+                <div class="flex gap-4 justify-center border-t border-gray-100 pt-8">
+                    <button onclick="showMenu()" class="px-6 py-3 rounded-xl border border-gray-300 font-medium text-gray-700 hover:bg-gray-50 transition">
+                        Menu Utama
+                    </button>
+                    <button onclick="reviewAnswers()" class="px-6 py-3 rounded-xl bg-blue-100 font-medium text-blue-700 hover:bg-blue-200 transition">
+                        Pembahasan
+                    </button>
+                    <button onclick="showMenu()" class="px-6 py-3 rounded-xl bg-blue-600 font-medium text-white hover:bg-blue-700 transition shadow-md shadow-blue-200">
+                        Ulangi Kuis
+                    </button>
+                </div>
+
+                <!-- Review Section (Hidden initially) -->
+                <div id="review-section" class="hidden mt-8 text-left border-t border-gray-100 pt-8">
+                    <h3 class="font-bold text-xl mb-4">Pembahasan</h3>
+                    <div id="review-list" class="flex flex-col gap-6">
+                        <!-- Reviews go here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Modal -->
+    <div id="custom-modal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 transition-opacity">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl transform scale-95 transition-transform" id="modal-content">
+            <h3 id="modal-title" class="text-lg font-bold text-gray-900 mb-2">Konfirmasi</h3>
+            <p id="modal-message" class="text-gray-600 mb-6">Apakah Anda yakin?</p>
+            <div class="flex justify-end gap-3">
+                <button id="modal-cancel" class="px-4 py-2 rounded-lg text-gray-600 font-medium hover:bg-gray-100 transition hidden">Batal</button>
+                <button id="modal-confirm" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow-sm">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA BANK SOAL (60 Soal) ---
+        const bankSoal = [
+            { q: "Apa istilah lain yang sering digunakan untuk menyebut proses pembuatan program dengan bahasa sehari-hari bersama AI?", options: ["Vibe coding.", "Hard coding.", "Live coding.", "Machine coding."], a: 0 },
+            { q: "Dalam koding dengan bantuan AI, apa peran utama manusia yang membedakannya dari koding konvensional?", options: ["Penulis kode satu-satunya.", "Hanya sebagai penguji hasil akhir.", "Sebagai pengarah dan peninjau.", "Sebagai penonton proses otomatis."], a: 2 },
+            { q: "Langkah berpikir komputasional yang berfokus pada memecah masalah besar menjadi bagian-bagian kecil disebut...", options: ["Algoritma.", "Abstraksi.", "Pengenalan Pola.", "Dekomposisi."], a: 3 },
+            { q: "Saat Anda fokus pada fitur utama aplikasi dan mengabaikan warna tombol pada tahap awal, Anda sedang menerapkan...", options: ["Abstraksi.", "Dekomposisi.", "Pengenalan Pola.", "Algoritma."], a: 0 },
+            { q: "Apa risiko utama dari penggunaan AI dalam proses koding menurut modul?", options: ["Kecepatan prototipe melambat.", "Kode keliru yang tampak meyakinkan.", "Sintaks selalu salah.", "AI menolak untuk menulis kode."], a: 1 },
+            { q: "Model yang melandasi asisten koding AI dan dilatih dengan data teks yang sangat besar disebut...", options: ["Lightweight Language Module.", "Large Language Model.", "Logic Learning Machine.", "Local Language Module."], a: 1 },
+            { q: "Mengapa model AI terkadang menghasilkan kode yang salah atau memanggil fungsi yang tidak ada?", options: ["Karena AI benci dipaksa bekerja.", "Karena memori AI terbatas.", "AI memprediksi pola tanpa memahami maknanya.", "AI salah mengkompilasi kode."], a: 2 },
+            { q: "Ruang kerja interaktif dari Google yang memungkinkan pengguna mengedit kode dan melihat pratinjau langsung disebut...", options: ["Google Antigravity.", "Gemini Canvas.", "Claude Artifacts.", "Google Code Space."], a: 1 },
+            { q: "Salah satu kelebihan utama Gemini Canvas bagi pengguna pemula adalah...", options: ["Tidak memerlukan proses instalasi apa pun.", "Bisa mengatur server database rumit.", "Bekerja di terminal secara otomatis.", "Mendukung proyek jutaan baris kode."], a: 0 },
+            { q: "Kekurangan utama dari Gemini Canvas menurut modul tersebut adalah...", options: ["Harus diinstal di komputer spesifikasi tinggi.", "Kurang cocok untuk proyek berskala besar dengan banyak berkas.", "Hanya mendukung bahasa Python.", "Pratinjau sangat lambat."], a: 1 },
+            { q: "Google Antigravity dirancang sebagai bentuk evolusi IDE yang berfokus pada...", options: ["Pengetikan manual.", "Agen AI.", "Kompilasi cloud.", "Perakitan perangkat keras."], a: 1 },
+            { q: "Pusat kendali di Google Antigravity untuk membuat dan memantau beberapa agen AI sekaligus disebut...", options: ["Agent Manager.", "Terminal Control.", "Workspace Hub.", "AI Dashboard."], a: 0 },
+            { q: "Di mana saja agen AI dalam Antigravity dapat merencanakan dan mengeksekusi tugas?", options: ["Hanya di editor kode.", "Editor, terminal, dan browser.", "Hanya di browser bawaan.", "Hanya di memori lokal."], a: 1 },
+            { q: "Daftar tugas, rencana implementasi, dan tangkapan layar yang dihasilkan oleh Antigravity disebut sebagai...", options: ["Workspaces.", "Modules.", "Artifacts.", "Blueprints."], a: 2 },
+            { q: "Tindakan apa yang harus sangat diwaspadai pengguna saat menggunakan agentic IDE seperti Antigravity?", options: ["Warna tema yang tiba-tiba berubah.", "Agen dapat menjalankan perintah pada sistem.", "IDE akan tertutup dengan sendirinya.", "Kode akan terhapus otomatis."], a: 1 },
+            { q: "Asisten koding berbasis AI yang dikembangkan oleh Anthropic adalah...", options: ["Gemini.", "Copilot.", "ChatGPT.", "Claude."], a: 3 },
+            { q: "Salah satu kelebihan utama Claude yang membuatnya sangat cocok untuk proses pembelajaran adalah...", options: ["Desain UI-nya paling bagus.", "Otomatis menginstal aplikasi.", "Penjelasan kode yang runtut.", "Pratinjaunya menggunakan server fisik."], a: 2 },
+            { q: "Proses merapikan kode agar lebih efisien dan jelas tanpa mengubah fungsinya disebut...", options: ["Refactoring.", "Debugging.", "Compiling.", "Testing."], a: 0 },
+            { q: "Alat koding berbasis agen dari Anthropic yang bekerja melalui terminal disebut...", options: ["Claude Agent.", "Claude Terminal.", "Claude Code.", "Claude Artifacts."], a: 2 },
+            { q: "Berdasarkan perbandingan alat, mana yang paling disarankan jika Anda ingin melihat prototipe halaman web secara cepat?", options: ["Claude Code.", "Google Antigravity.", "Gemini Canvas.", "Visual Studio Biasa."], a: 2 },
+            { q: "Alat manakah yang paling ideal untuk mengerjakan proyek multi-berkas dengan tingkat otonomi AI yang tinggi?", options: ["Gemini Canvas.", "Google Antigravity.", "Claude Artifacts.", "Notepad."], a: 1 },
+            { q: "Rumus penulisan prompt koding yang direkomendasikan dalam modul adalah...", options: ["Konteks + Tugas + Batasan + Format.", "Konteks + Batasan + Pengujian + Output.", "Tugas + Error + Harapan + Waktu.", "Format + Bahasa + Struktur + Data."], a: 0 },
+            { q: "Manakah pernyataan di bawah ini yang merupakan contoh elemen 'Batasan' dalam sebuah prompt?", options: ["Saya adalah siswa kelas XII.", "Buatkan aplikasi to-do list.", "Gunakan HTML dan CSS saja, tanpa library tambahan.", "Beri komentar pada tiap baris kode."], a: 2 },
+            { q: "Meminta AI membuat fitur satu per satu daripada meminta keseluruhan aplikasi sekaligus disebut teknik prompt...", options: ["Masif.", "Bertahap atau iteratif.", "Sekaligus.", "Acak."], a: 1 },
+            { q: "Saat menghadapi kode yang error, tindakan terbaik dalam menulis prompt adalah...", options: ["Mengatakan 'Kode Anda rusak, perbaiki'.", "Menyalin pesan error lengkap ke dalam prompt.", "Menghapus semua kode dan meminta ulang.", "Mengganti bahasa pemrograman."], a: 1 },
+            { q: "Siklus kerja berulang yang terdiri dari prompt, hasil, uji, umpan balik, dan revisi disebut...", options: ["Siklus air.", "Siklus waterfall.", "Siklus iteratif.", "Siklus komputasi."], a: 2 },
+            { q: "Mengapa disarankan untuk mengubah satu fitur saja dalam setiap iterasi?", options: ["Agar AI tidak kelelahan.", "Agar aplikasi terlihat lambat dibuat.", "Agar penyebab error lebih mudah dilacak jika terjadi masalah.", "Karena AI membatasi panjang teks."], a: 2 },
+            { q: "Langkah pertama yang paling tepat saat melakukan debugging adalah...", options: ["Menghapus baris kode yang dicurigai.", "Membaca pesan error dengan sangat teliti.", "Mematikan komputer.", "Meminta AI menulis ulang keseluruhan aplikasi."], a: 1 },
+            { q: "Apa arti dari 'reproduksi kesalahan' dalam konteks debugging?", options: ["Menemukan langkah yang memunculkan error.", "Menyalin error ke dokumen lain.", "Membagikan error kepada teman.", "Menggandakan baris kode yang rusak."], a: 0 },
+            { q: "Pertanyaan apa yang harus diajukan untuk mengevaluasi aspek 'Kualitas' kode AI?", options: ["Apakah aplikasi aman dari pencurian data?", "Apakah kode rapi dan diberi komentar?", "Apakah sesuai kebutuhan bisnis?", "Apakah menggunakan framework terbaru?"], a: 1 },
+            { q: "Meninjau kode dari API key atau kata sandi yang mungkin tertulis secara langsung adalah bagian dari evaluasi...", options: ["Kebenaran.", "Keamanan.", "Kualitas.", "Kebaruan."], a: 1 },
+            { q: "Prinsip etika yang menekankan untuk tidak memasukkan data pribadi atau dokumen rahasia ke dalam prompt adalah...", options: ["Integritas akademik.", "Privasi dan data.", "Hak cipta.", "Bias AI."], a: 1 },
+            { q: "Menyebutkan bagian mana saja dari tugas yang dibantu oleh AI merupakan bentuk kepatuhan pada etika...", options: ["Privasi data.", "Keamanan jaringan.", "Integritas akademik.", "Hak paten."], a: 2 },
+            { q: "Mengapa modul menyarankan untuk tetap menguasai dasar pemrograman alih-alih sepenuhnya mengandalkan AI?", options: ["Karena AI akan berbayar mahal.", "Untuk menghindari bahaya ketergantungan.", "Karena guru mewajibkan.", "Karena AI tidak bisa menulis HTML."], a: 1 },
+            { q: "Konsep di mana manusia tetap mengawasi, mengevaluasi, dan menyetujui langkah AI dalam alur otomatisasi disebut...", options: ["Human-out-of-bound.", "Machine-in-charge.", "Human-in-the-loop.", "Autonomous-loop."], a: 2 },
+            { q: "Dalam studi kasus praktik terpandu, rumus '30% tugas + 30% UTS + 40% UAS' merepresentasikan langkah berpikir komputasional bagian...", options: ["Algoritma.", "Dekomposisi.", "Pengenalan pola.", "Abstraksi."], a: 0 },
+            { q: "Dalam pengujian aplikasi hitung nilai, mengisi nilai tugas dengan huruf atau angka 150 adalah contoh pengujian dengan...", options: ["Batas bawah.", "Input normal.", "Input tidak valid / ekstrem.", "Input konversi tipe."], a: 2 },
+            { q: "Skenario uji batas bawah dalam aplikasi hitung nilai rapor sebaiknya diberikan angka...", options: ["-1, -1, -1", "0, 0, 0", "100, 100, 100", "Huruf a, b, c"], a: 1 },
+            { q: "Apa fungsi tahap Refleksi dan Dokumentasi setelah selesai memodifikasi kode dengan AI?", options: ["Untuk diserahkan ke developer AI.", "Mencatat perbaikan dan pelajaran agar tidak terulang.", "Menghapus riwayat percakapan.", "Meningkatkan kecepatan loading aplikasi."], a: 1 },
+            { q: "Di antara ketiganya, manakah yang BUKAN merupakan alat utama yang dibahas di modul?", options: ["Gemini Canvas.", "Claude.", "Microsoft Copilot.", "Google Antigravity."], a: 2 },
+            { q: "Apa perlakuan terbaik jika AI menghasilkan sebuah kode fungsi (library) yang tampaknya usang?", options: ["Menerimanya saja karena AI pasti benar.", "Mengevaluasi aspek kebaruannya secara mandiri.", "Mengurangi nilai ujian AI.", "Langsung menyalin pesan error."], a: 1 },
+            { q: "Sebutan untuk lingkungan IDE yang pola kerjanya berpusat pada agen mandiri adalah...", options: ["Traditional IDE.", "Agentic IDE.", "Cloud IDE.", "Visual IDE."], a: 1 },
+            { q: "Pada Antigravity, apa yang biasanya disarankan agen sebelum mulai menulis seluruh kode?", options: ["Menghapus folder proyek.", "Menyusun rencana kerja dan daftar tugas.", "Menjalankan aplikasi browser.", "Meminta bayaran."], a: 1 },
+            { q: "Contoh pengimplementasian 'Dekomposisi' pada pembuatan aplikasi to-do list adalah...", options: ["Memisahkan tugas tambah, tugas hapus, tugas centang.", "Membuat tombol berwarna merah.", "Menggunakan bahasa JavaScript.", "Menulis struktur HTML."], a: 0 },
+            { q: "Prompt 'Gunakan HTML, CSS, JS dalam satu berkas' tergolong ke dalam struktur bagian...", options: ["Konteks.", "Tugas.", "Batasan.", "Format."], a: 2 },
+            { q: "Prompt 'Jelaskan kode ini baris per baris dengan bahasa santai' tergolong ke dalam struktur bagian...", options: ["Konteks.", "Tugas.", "Batasan.", "Format."], a: 3 },
+            { q: "Apa arti 'Tampilan harus responsif' dalam pembuatan web?", options: ["Website cepat dimuat.", "Halaman menyesuaikan layar HP maupun komputer.", "Tombol bereaksi saat ditekan.", "Database tersimpan aman."], a: 1 },
+            { q: "Apa manfaat 'Isolasi bagian kode bermasalah' dalam proses perbaikan error?", options: ["Mencegah bagian kode yang sehat ikut terganggu.", "Membuat kode menjadi lebih panjang.", "Menyembunyikan error dari pengguna.", "Menambah fitur baru secara otomatis."], a: 0 },
+            { q: "Pilih skenario mana yang merupakan contoh penyusunan 'Konteks' yang baik?", options: ["Buatkan saya aplikasi kasir.", "Bungkus setiap kode dengan blok pre-tag.", "Gunakan bahasa Python.", "Saya siswa pemula belajar dasar pemrograman web."], a: 3 },
+            { q: "Proses menjelaskan kebutuhan dalam bahasa sehari-hari kepada AI agar menghasilkan program sering disebut...", options: ["AI-assisted coding.", "Hardcoding.", "Brute forcing.", "Syntax mapping."], a: 0 },
+            { q: "Pratinjau (preview) di Gemini Canvas sangat berguna karena...", options: ["Otomatis mengunggah kode ke server hosting.", "Hasil web langsung terlihat tanpa menjalankan program secara manual.", "Dapat mendeteksi virus pada komputer lokal.", "Menyediakan database SQL bawaan."], a: 1 },
+            { q: "Saat Claude digunakan untuk 'Refactoring', apa tujuan utamanya?", options: ["Mencari penyebab error.", "Menambah fitur baru yang rumit.", "Merapikan kode agar lebih singkat dan efisien tanpa mengubah fungsinya.", "Menerjemahkan teks dari bahasa Indonesia ke Inggris."], a: 2 },
+            { q: "Jika Anda ingin memahami mengapa kode error dan ingin belajar konsepnya dengan penjelasan yang runtut, alat yang paling tepat adalah...", options: ["Gemini Canvas.", "Notepad++.", "Google Antigravity.", "Claude."], a: 3 },
+            { q: "Menulis 'Saya mahasiswa membuat proyek akhir' pada awal percakapan dengan AI bertujuan untuk memberikan...", options: ["Format output.", "Batasan sistem.", "Konteks pengguna.", "Tugas spesifik."], a: 2 },
+            { q: "Salah satu contoh hasil Artifacts di Google Antigravity adalah...", options: ["Sistem operasi baru.", "Hardware komputer.", "Rencana implementasi dan rekaman browser.", "Buku cetak manual."], a: 2 },
+            { q: "Langkah berpikir 'Pengenalan Pola' berfungsi untuk...", options: ["Memecah masalah menjadi kecil.", "Menyusun langkah berurutan.", "Menemukan kesamaan yang bisa dijadikan fungsi/pengulangan.", "Mengabaikan detail tak penting."], a: 2 },
+            { q: "Mengapa memberikan umpan balik (feedback) kepada AI sangat penting dalam siklus kerja?", options: ["Agar AI mendapat nilai bagus.", "Untuk merevisi hasil agar lebih sesuai dengan kebutuhan.", "Untuk mempercepat koneksi internet.", "Agar aplikasi tidak terkena virus."], a: 1 },
+            { q: "Apakah hasil keluaran AI selalu 100% aman dan bebas dari celah keamanan?", options: ["Ya, AI diprogram untuk aman.", "Tidak, kode AI dapat memuat celah keamanan dan harus ditinjau.", "Ya, selama menggunakan prompt berbayar.", "Tidak, tapi tidak perlu diperbaiki."], a: 1 },
+            { q: "Pada Claude, hasil seperti halaman web atau aplikasi kecil dapat ditampilkan di jendela samping yang disebut...", options: ["Artifacts.", "Canvas.", "Workspace.", "Terminal."], a: 0 },
+            { q: "Dalam koding AI, keahlian utama yang lebih dibutuhkan dibanding menghafal sintaks adalah...", options: ["Mengetik cepat 10 jari.", "Berpikir komputasional dan prompt engineering.", "Merakit komputer hardware.", "Desain grafis 3D."], a: 1 }
+        ];
+
+        // --- STATE VARIABLES ---
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = {}; // key: index, val: selected option index
+        let raguRagu = new Set();
+        let timerInterval;
+        let totalSeconds = 3600; // 1 jam
+
+        // --- DOM ELEMENTS ---
+        const viewMenu = document.getElementById('view-menu');
+        const viewQuiz = document.getElementById('view-quiz');
+        const viewResult = document.getElementById('view-result');
+        const navTimer = document.getElementById('nav-timer');
+        
+        // --- MODAL UTILS ---
+        const modal = document.getElementById('custom-modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalConfirm = document.getElementById('modal-confirm');
+        const modalCancel = document.getElementById('modal-cancel');
+
+        function showModal(title, message, onConfirm, showCancel = false) {
+            modalTitle.innerText = title;
+            modalMessage.innerText = message;
+            
+            modalConfirm.onclick = () => {
+                closeModal();
+                if(onConfirm) onConfirm();
+            };
+
+            if (showCancel) {
+                modalCancel.classList.remove('hidden');
+                modalCancel.onclick = closeModal;
+            } else {
+                modalCancel.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            // Trigger animation
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200); // match transition duration
+        }
+
+        // --- CORE LOGIC ---
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        function startQuiz(num) {
+            // Setup Questions
+            let shuffled = shuffleArray([...bankSoal]);
+            currentQuestions = shuffled.slice(0, num);
+            
+            // Reset state
+            userAnswers = {};
+            raguRagu = new Set();
+            currentIndex = 0;
+            totalSeconds = 3600;
+
+            // Switch View
+            viewMenu.classList.add('hidden');
+            viewResult.classList.add('hidden');
+            viewQuiz.classList.remove('hidden');
+            navTimer.classList.remove('hidden');
+
+            // Initialize UI
+            renderNavGrid();
+            renderQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                totalSeconds--;
+                updateTimerDisplay();
+                if (totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    showModal("Waktu Habis", "Waktu Anda telah habis. Jawaban akan dikumpulkan secara otomatis.", submitQuiz, false);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            navTimer.innerText = `${h}:${m}:${s}`;
+            
+            if (totalSeconds < 300) { // last 5 minutes
+                navTimer.classList.add('bg-red-100', 'text-red-700', 'border-red-200');
+                navTimer.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
+            } else {
+                navTimer.classList.remove('bg-red-100', 'text-red-700', 'border-red-200');
+                navTimer.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
+            }
+        }
+
+        function renderQuestion() {
+            const q = currentQuestions[currentIndex];
+            document.getElementById('q-number').innerText = currentIndex + 1;
+            document.getElementById('q-text').innerText = q.q;
+            
+            // Ragu checkbox state
+            const chkRagu = document.getElementById('chk-ragu');
+            const btnRagu = document.getElementById('btn-ragu');
+            chkRagu.checked = raguRagu.has(currentIndex);
+            if (chkRagu.checked) {
+                btnRagu.classList.add('bg-yellow-50', 'border-yellow-300', 'text-yellow-700');
+                btnRagu.classList.remove('text-gray-600');
+            } else {
+                btnRagu.classList.remove('bg-yellow-50', 'border-yellow-300', 'text-yellow-700');
+                btnRagu.classList.add('text-gray-600');
+            }
+
+            // Render Options
+            const optContainer = document.getElementById('q-options');
+            optContainer.innerHTML = '';
+            
+            const labels = ['A', 'B', 'C', 'D'];
+            q.options.forEach((optText, i) => {
+                const isSelected = userAnswers[currentIndex] === i;
+                const btn = document.createElement('button');
+                btn.className = `btn-option w-full text-left px-5 py-4 rounded-xl border ${isSelected ? 'selected' : 'border-gray-200 bg-white'} flex items-start gap-4`;
+                btn.onclick = () => selectOption(i);
+                
+                btn.innerHTML = `
+                    <div class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 border border-gray-200'} mt-0.5">
+                        ${labels[i]}
+                    </div>
+                    <div class="text-gray-700 font-medium pt-1">${optText}</div>
+                `;
+                optContainer.appendChild(btn);
+            });
+
+            updateNavHighlight();
+        }
+
+        function selectOption(optIndex) {
+            userAnswers[currentIndex] = optIndex;
+            renderQuestion(); // Re-render to show selection
+            renderNavGrid();  // Update grid color
+        }
+
+        function toggleRagu() {
+            if (raguRagu.has(currentIndex)) {
+                raguRagu.delete(currentIndex);
+            } else {
+                raguRagu.add(currentIndex);
+            }
+            renderQuestion();
+            renderNavGrid();
+        }
+
+        function nextQuestion() {
+            if (currentIndex < currentQuestions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function goToQuestion(idx) {
+            currentIndex = idx;
+            renderQuestion();
+        }
+
+        function renderNavGrid() {
+            const grid = document.getElementById('nav-grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < currentQuestions.length; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i + 1;
+                btn.className = 'nav-btn w-full aspect-square rounded-lg border font-semibold text-sm flex items-center justify-center';
+                
+                // Colors
+                if (raguRagu.has(i)) {
+                    btn.classList.add('ragu');
+                } else if (userAnswers[i] !== undefined) {
+                    btn.classList.add('answered');
+                } else {
+                    btn.classList.add('bg-white', 'text-gray-600', 'border-gray-200');
+                }
+
+                btn.onclick = () => goToQuestion(i);
+                grid.appendChild(btn);
+            }
+            updateNavHighlight();
+        }
+
+        function updateNavHighlight() {
+            const grid = document.getElementById('nav-grid');
+            const btns = grid.children;
+            for(let i=0; i<btns.length; i++) {
+                if (i === currentIndex) {
+                    btns[i].classList.add('active');
+                } else {
+                    btns[i].classList.remove('active');
+                }
+            }
+        }
+
+        function confirmSubmit() {
+            const answeredCount = Object.keys(userAnswers).length;
+            const total = currentQuestions.length;
+            let msg = `Anda telah menjawab ${answeredCount} dari ${total} soal.`;
+            if (raguRagu.size > 0) {
+                msg += ` Ada ${raguRagu.size} soal yang masih ditandai ragu-ragu.`;
+            }
+            msg += ` Yakin ingin mengumpulkan sekarang?`;
+
+            showModal("Kumpulkan Ujian", msg, submitQuiz, true);
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let benar = 0;
+            let salah = 0;
+            let kosong = 0;
+
+            currentQuestions.forEach((q, i) => {
+                if (userAnswers[i] === undefined) {
+                    kosong++;
+                } else if (userAnswers[i] === q.a) {
+                    benar++;
+                } else {
+                    salah++;
+                }
+            });
+
+            const score = Math.round((benar / currentQuestions.length) * 100);
+
+            // Update Result UI
+            document.getElementById('res-benar').innerText = benar;
+            document.getElementById('res-salah').innerText = salah;
+            document.getElementById('res-kosong').innerText = kosong;
+            document.getElementById('res-score').innerText = score;
+            
+            // Build Review UI
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+            const labels = ['A', 'B', 'C', 'D'];
+
+            currentQuestions.forEach((q, i) => {
+                const userAns = userAnswers[i];
+                const isCorrect = userAns === q.a;
+                const isKosong = userAns === undefined;
+
+                const div = document.createElement('div');
+                div.className = `p-5 rounded-xl border ${isCorrect ? 'border-green-200 bg-green-50' : (isKosong ? 'border-gray-200 bg-gray-50' : 'border-red-200 bg-red-50')}`;
+                
+                div.innerHTML = `
+                    <div class="font-bold mb-2 flex items-center gap-2">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full ${isCorrect ? 'bg-green-500' : (isKosong ? 'bg-gray-400' : 'bg-red-500')} text-white text-xs">
+                            ${i+1}
+                        </span>
+                        <span class="text-gray-800">${isCorrect ? 'Benar' : (isKosong ? 'Tidak Dijawab' : 'Salah')}</span>
+                    </div>
+                    <p class="text-gray-800 mb-3">${q.q}</p>
+                    <div class="text-sm space-y-1">
+                        <div class="text-gray-600">Jawaban Anda: <span class="font-semibold">${isKosong ? '-' : q.options[userAns]}</span></div>
+                        <div class="text-green-700">Jawaban Benar: <span class="font-semibold">${q.options[q.a]}</span></div>
+                    </div>
+                `;
+                reviewList.appendChild(div);
+            });
+
+            document.getElementById('review-section').classList.add('hidden'); // hidden initially on result screen
+
+            // Switch View
+            viewQuiz.classList.add('hidden');
+            navTimer.classList.add('hidden');
+            viewResult.classList.remove('hidden');
+        }
+
+        function showMenu() {
+            clearInterval(timerInterval);
+            viewResult.classList.add('hidden');
+            viewQuiz.classList.add('hidden');
+            navTimer.classList.add('hidden');
+            viewMenu.classList.remove('hidden');
+        }
+
+        function reviewAnswers() {
+            const reviewSec = document.getElementById('review-section');
+            if(reviewSec.classList.contains('hidden')) {
+                reviewSec.classList.remove('hidden');
+                reviewSec.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                reviewSec.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
